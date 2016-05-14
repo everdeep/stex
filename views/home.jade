@@ -1,0 +1,21 @@
+doctype html
+html(lang="en")
+	head
+		title= title
+	body
+		h1= title
+		p
+			| Welcome to the homepage!
+			| Enjoy your stay.
+			
+		ul
+			each val in numbers
+				li= val
+			
+			if numbers.length > 5
+				p You have many numbers...
+			else
+				p Get more numbers...
+		
+		script(src='/js/script.js')
+			
