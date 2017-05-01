@@ -8,7 +8,7 @@ router.get('/', function* () {
 
 router.get('/posts', function* () {
 
-	var posts = yield db.many(`SELECT * FROM posts`);
+	var posts = yield db.many(`SELECT * FROM announcements`);
 
 	yield this.render('posts', {
 		posts: posts,
@@ -21,7 +21,7 @@ router.get('/posts/:id', function* () {
 	var id = this.params.id;
 
 	try {
-		var post = yield db.one(`SELECT * FROM posts WHERE id = $1`, [id]);
+		var post = yield db.one(`SELECT * FROM announcements WHERE id = $1`, [id]);
 
 		yield this.render('post', {
 			post: post,

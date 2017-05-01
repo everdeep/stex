@@ -1,15 +1,15 @@
 doctype html
 html
 	head
-		title Posts
+		title Announcements
 	
 	body
-		h1 Posts
+		h1 Announcements
 		
 		if posts.length === 0
-			p No posts to show...
+			p No announcements to show...
 		else
 			ul
 				each post in posts
 					li
-						a(href='/posts/#{post.id}')=post.title
+						a(href='/posts/#{post.id}')=post.headline

@@ -1,8 +1,11 @@
 import sys
 import re
+import psycopg2
 
 from pyquery import PyQuery as pq
 from lxml import etree
+
+links = []
 
 d = pq(url='http://www.asx.com.au/asx/statistics/prevBusDayAnns.do')
 table = d('.contenttable')
@@ -10,23 +13,54 @@ table = d('.contenttable')
 if len(table) == 0:
 	print 'Unable to find the table element'
 
-with open('./assets/data/test.txt', mode='w+') as txtfile:
-	temp = str(table)
-	txtfile.write(temp)
+# get all the announcement links
+for column in d('td a'):
+	a = pq(url='http://www.asx.com.au' + str(column.attrib['href']))
+	count = 0
+	for elem in a('form input'):
+		if count == 2:
+			links.append('http://www.asx.com.au' + elem.attrib['value'])
+		count += 1
 
-with open('./assets/data/columns.txt', mode='w+') as txtfile:
-	for column in d('tr th a'):
-		txtfile.write(str(column.text) + ' ')
+with open('./assets/data/prevAnnouncements.txt', mode='w+') as outfile:
 
-	txtfile.write('\n')
+	count = 0
+	index = 0
+	for column in d('td'):
+		if count == 6:
+			outfile.write('\n')
+			count = 0
 
-	for row in d('tr'):
-		for column in d('tr td'):
-			txtfile.write(str(d))
-		txtfile.write('\n')
+		if count == 5:
+			outfile.write(links[index])
+			count += 1
+			index += 1
+			continue
 
+		try:
+			temp = str(column.text)
+			if temp == 'None':
+				count += 1
+				continue
+			outfile.write(temp + '; ')
+		except Exception:
+			pass
 
+		count += 1
 
+# # Connect to an existing database
+# conn = psycopg2.connect("dbname=stex user=Rush")
+#
+# # Open a cursor to perform database operations
+# cur = conn.cursor()
+
+with open('./assets/data/prevAnnouncements.txt') as infile, open('./sql/inserts.sql', mode='w+') as outfile:
+	for line in infile:
+		temp = line.split('; ')[2].replace("'", "''")
+
+		outfile.write(
+		'''INSERT INTO announcements (code, time_posted, headline, pages, pdf) VALUES ('%s', '%s', '%s', %s, '%s');\n''' %
+		(line.split('; ')[0], line.split('; ')[1], temp, line.split('; ')[3], line.split('; ')[4].strip()))
 #
 # for row_elem in d('#pokedex tbody tr'):
 # 	row = []
